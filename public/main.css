@@ -1,0 +1,17 @@
+
+
+.aboutBlk{
+    font-family: monospace;
+
+}
+.aboutNav{
+    background-color: thistle;
+    padding: 0.5%;
+    font-family: monospace;
+}
+.aboutBody{
+    background-color: aliceblue;    
+}
+.aboutHead{
+    font-family: monospace;
+}
