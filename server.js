@@ -35,7 +35,7 @@ app.get("/posts", function(req,res){
   })
 app.get("/categories", function(req,res){
     blog
-      .getAllPosts().then((data) => {
+      .getCategories().then((data) => {
         res.json({data})
       })
       .catch((err) => {
@@ -43,7 +43,7 @@ app.get("/categories", function(req,res){
       })
 })
 
-app.all("*", (req, res) => {
+app.get("*", (req, res) => {
 	res.status(404).send(" 404 Page Not Found ⚠️");
 });
 

@@ -30,6 +30,8 @@ let categories = []
      resolve()
    })
  }
+
+
  
  exports.getAllPosts = function() {
    return new Promise(function(resolve, reject) {
