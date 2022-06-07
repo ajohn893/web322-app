@@ -1,0 +1,22 @@
+{
+  "name": "web322-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sever.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajohn893/helloworld.git"
+  },
+  "author": "Aaron John Bivera",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ajohn893/helloworld/issues"
+  },
+  "homepage": "https://github.com/ajohn893/helloworld#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
