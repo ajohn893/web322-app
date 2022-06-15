@@ -1,5 +1,3 @@
-
-
 let posts = []
 let categories = []
 const { rejects } = require("assert")
@@ -34,7 +32,6 @@ const { resolve } = require("path")
  }
 
 
- 
  exports.getAllPosts = function() {
    return new Promise(function(resolve, reject) {
      if (posts.length == 0) {
@@ -64,16 +61,52 @@ const { resolve } = require("path")
 		});*/
 
 // exports.addPost (postData)
-function addPost(postData) {
-  return new Promise((resolve, rejects) => {
-    if (postData.published == 0) {
-      reject("Undefined")
-      return
+exports.addPost = () => (postData)=>{
+  var AddPost = new Promise((resolve, reject) => {
+    if (postData){
+      postData.id = posts.length +1;
+      if (postData.published){
+        postData.published = true;}
+      else {
+        postData.published = false; 
+          posts.push(postData);
+          resolve(posts);}
     }
-    resolve(addPost)
+    else{
+      errorReturn = "Erro found!";
+      reject({ message: errorReturn});
+    }
   })
+  return AddPost;
 }
 
+exports.getPostsByMinDate = () => {
+  var post = [];
+  var AddPost = new Promise((resolve,reject) => {
+    for(var i =0; i < posts.length; i++) {
+      if(new Date(posts[i].postData) >= new Date(minDateStr)){
+        console.log("PostDate value is greater than minDateStr")
+        post.push(posts[i]);
+      }
+    }
+      if(post.length == 0){
+        errorReturn = "no results returned";
+        reject({ message: errorReturn});
+      }
+      resolve(post);
+  })
+  return AddPost;
+};
+
+exports.getPostById = (id) => {
+  return new Promise((resolve,reject) => {
+    var post = posts.filter(posts => posts.id == id);
+    if (post.length == 0) {
+      reject("no results returned");
+    }
+    resolve(post);
+  })
+}
 
  exports.getCategories = () => {
    return new Promise((resolve, reject) => {
@@ -85,43 +118,4 @@ function addPost(postData) {
    })
  }
  
- /*module.exports.addPost = function (postData) {
-  var promise = new Promise(function (resolve, reject) {
-    if (postData) {
-      postData.id  = p.length + 1;
-      if (postData.published )
-        postData.published  = true;
-      else
-        postData.published  = false;
-      p.push(postData);
-      resolve(p);
-    }
-    else {
-      errMessage = "Something wrong function";
-      reject({ message: errMessage });
-    }
-  })
-  return promise;
-
-  module.exports.getPostsByMinDate = function (minDateStr) {
-    var post = [];
-  
-    var promise = new Promise((resolve, reject) => {
-  
-      for (var i = 0; i < p.length; i++) {
-        if(new Date(p[i].postDate) >= new Date(minDateStr)){
-      console.log("The postDate value is greater than minDateStr ")
-      post.push(p[i]);
-  }
-      }
-      if (post.length === 0) {
-        errMessage = "no results returned";
-        reject({ message: errMessage });
-      }
-      resolve(post);
-  
-    })
-    return promise;
-  };
-
-}*/
+ 

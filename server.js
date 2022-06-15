@@ -30,7 +30,8 @@ cloudinary.config({
 const upload = multer(); 
 
 
-// remove comment after editing about.html file app.use(express.static("public"));
+// remove comment after editing about.html file 
+app.use(express.static("public"));
 
 app.get("/", (req,res) => {
   res.redirect("/about");

@@ -2,7 +2,7 @@
 
 .aboutBlk{
     font-family: monospace;
-
+    font-weight: 500;
 }
 .aboutNav{
     background-color: thistle;
@@ -13,5 +13,38 @@
     background-color: aliceblue;    
 }
 .aboutHead{
+    font-family: monospace;   
+}
+.aboutH2{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande';
+}
+.aboutEnd{
     font-family: monospace;
+    font-weight: 500;
+    font-size: 20px;
+}
+.aboutSoon{
+     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande';
+}
+.addNav{
+    background-color: thistle;
+    font-family: monospace;
+}
+.addBody{
+    background-color: aliceblue;
+    font-family: monospace;    
+}
+.footerH{
+    font-family: monospace;
+    font-size:13px;
+    padding-right:40px;
+    float:right;
+    height: 50px;
+    margin-top: 10px;
+}
+.content img{
+    margin-top: 110px;
+    margin-left: 1260px;
+    width: 48px;
+    height: 48px;
 }
