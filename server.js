@@ -5,9 +5,9 @@
 * 
 *  Name: --Aaron John Bivera-- Student ID: --156486201-- Date: --16/06/2022--
 *
-*  Online (Heroku) URL: ___https://frozen-temple-45666.herokuapp.com____
+*  Online (Heroku) URL: https://frozen-temple-45666.herokuapp.com
 *
-*  GitHub Repository URL: ______https://github.com/ajohn893/web322-app.git________________________________________________
+*  GitHub Repository URL: https://github.com/ajohn893/web322-app.git_
 *
 ********************************************************************************/ 
 const HTTP_PORT = process.env.PORT || 8080;
