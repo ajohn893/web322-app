@@ -73,11 +73,11 @@ exports.addPost = () => (postData)=>{
           resolve(posts);}
     }
     else{
-      errorReturn = "Erro found!";
+      errorReturn = "Error found!";
       reject({ message: errorReturn});
     }
+    return(AddPost)
   })
-  return AddPost;
 }
 
 exports.getPostsByMinDate = (minDateStr) => {
