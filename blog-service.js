@@ -80,7 +80,7 @@ exports.addPost = () => (postData)=>{
   return AddPost;
 }
 
-exports.getPostsByMinDate = () => {
+exports.getPostsByMinDate = (minDateStr) => {
   var post = [];
   var AddPost = new Promise((resolve,reject) => {
     for(var i =0; i < posts.length; i++) {

@@ -29,8 +29,6 @@ cloudinary.config({
 });
 
 const upload = multer(); 
-
-
 // remove comment after editing about.html file 
 app.use(express.static("public"));
 
@@ -40,10 +38,6 @@ app.get("/", (req,res) => {
 
 app.get("/about", (req,res) => {
   res.sendFile(path.join(__dirname, "./views/about.html"));
-});
-
-app.get("/posts/add", (req,res) => {
-  res.sendFile(path.join(__dirname, "./views/addPost.html"));
 });
 
 
@@ -65,9 +59,10 @@ app.get("/posts", (req,res) => {
       res.json({message: err})
     })
   })
+
 app.get("/categories", (req,res) => {
     blog
-      .getCategories().then((data) => {
+    .getCategories().then((data) => {
         res.json({data})
       })
       .catch((err) => {
@@ -75,9 +70,13 @@ app.get("/categories", (req,res) => {
       })
 })
 
-app.post("/register-user", 
+app.get("/posts/add", (req,res) => {
+  res.sendFile(path.join(__dirname, "./views/addPost.html"));
+});
+
+
+app.post("/posts/add", 
 upload.single("feautureimage"), (req, res) => {
-  res.send("register");
   if(req.file){
     let streamUpload = (req) => {
         return new Promise((resolve, reject) => {
@@ -104,13 +103,27 @@ upload.single("feautureimage"), (req, res) => {
     upload(req).then((uploaded)=>{
         processPost(uploaded.url);
     });
-}else{
+} else {
     processPost("");
-}
+  }
  
-function processPost(imageUrl){
+  function processPost(imageUrl){
     req.body.featureImage = imageUrl;
+    blog.addPost(req.body)
+    .then(() => {
+      res.redirect("/posts");
+    })
 }
+});
+
+app.get("/post/:value", (req, res) => {
+  blog.getPostById(req.params.value)
+      .then((data) => {
+          res.json(data);
+      })
+      .catch((err) => {
+          res.json(err);
+      })
 });
 
 app.get("*", (req, res) => {
@@ -120,7 +133,7 @@ app.get("*", (req, res) => {
 blog
   .initialize().then(() => {
     app.listen(HTTP_PORT, () => {
-      console.log(`Express http server listening on ${HTTP_PORT}`);
+      console.log('⚡️⚡️⚡️ '+`Express http server listening on ${HTTP_PORT}` + ' ⚡️⚡️⚡️');
     });
   })
   .catch((error) => {
