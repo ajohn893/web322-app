@@ -27,105 +27,111 @@ cloudinary.config({
   api_secret: 'w-OcperQYlP5WQ3_j-KBLHjwpE4',
   secure: true
 })
-// remove comment after editing about.html file
-
 
 app.use(express.static("public"));
 
-app.get("/", (req,res) => {
-  res.redirect("/about");
-});
-
-app.get("/about", (req,res) => {
-  res.sendFile(path.join(__dirname, "./views/about.html"));
+app.get("/", (req, res) => {
+  res.redirect("/about")
+})
+app.get("/about", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/about.html"))
 })
 
-app.get("/blog", (req,res) => {
+app.get("/blog", (req, res) => {
   blog
-    .getPublishedPosts().then((data) => {
-      res.json({data})
-    }).catch((err) => {
-      res.json({message: err})
+    .getPublishedPosts()
+    .then((data) => {
+      res.json({ data })
+    })
+    .catch((err) => {
+      res.json({ message: err })
     })
 })
 
-app.get("/categories", (req,res) => {
+app.get("/categories", (req, res) => {
   blog
-  .getCategories().then((data) => {
-      res.json({data})
-    }).catch((err) => {
-      res.json({message: err})
+    .getCategories()
+    .then((data) => {
+      res.json({ data })
+    })
+    .catch((err) => {
+      res.json({ message: err })
     })
 })
 app.get("/posts", (req, res) => {
-    if(req.query.category){
-        blog.getPostBycategory(req.query.category)
-        .then((data) => {
-            res.json(data);
-        }).catch((err) => {
-            res.json(err);
-        });
-    } else if(req.query.minDate){
-        blog.getPostsByMinDate(req.query.minDate)
-          .then((data) => {
-            res.json(data);
-          }).catch((err) => {
-            res.json(err);
-         })
-      }
-      else{
-        blog.getAllPosts()
-        .then((data) => {
-            res.json(data);
-        }).catch ((err) => {
-            console.log(err);
-            res.json(err);
-        });
-    }  
- });  
-
-app.get("/posts/add", (req,res) => {
-  res.sendFile(path.join(__dirname, "./views/addPost.html"));
-});
-
-app.get('/posts/:id', (req, res) => {
-  blog.getPostById(req.params.id)
+  if (req.query.category) {
+    blog
+      .getPostsByCategory(req.query.category)
       .then((data) => {
-          res.json(data);
-      }).catch((err) => {
-          res.json(err);
+        res.json(data)
       })
-});
+      .catch((err) => {
+        res.json({ message: err })
+      })
+  } else if (req.query.minDate) {
+    blog
+      .getPostsByMinDate(req.query.minDate)
+      .then((data) => {
+        res.json(data)
+      })
+      .catch((err) => {
+        res.json({ message: err })
+      })
+  } else {
+    blog
+      .getAllPosts()
+      .then((data) => {
+        res.json(data)
+      })
+      .catch((err) => res.json({ message: err }))
+  }
+})
 
-app.post("/posts/add", 
-upload.single("feautureimage"), (req, res) => {
-    let streamUpload = (req) => {
-        return new Promise((resolve, reject) => {
-            let stream = cloudinary.uploader.upload_stream(
-                (error, result) => {
-                    if (result) {
-                      resolve(result);
-                    } else {
-                      reject(error);
-                    }
-                })
-            streamifier.createReadStream(req.file.buffer).pipe(stream);
-        });
-    }
-     async function upload(req) {
-        let result = await streamUpload(req);
-        console.log(result);
-        return result;
-    }
-    upload(req)
-    .then((uploaded)=>{
-        req.body.featureImage = uploaded.url
-        blog.addPost(req.body)
-        .then(() => {
-          res.redirect("/posts")
-        }).catch((err) => {
-          res.send()
-        })
+app.get("/posts/add", (req, res) => {
+  res.sendFile(path.join(__dirname + "/views/addPost.html"))
+})
+
+app.post("/posts/add", upload.single("featureImage"), (req, res) => {
+  let streamUpload = (req) => {
+    return new Promise((resolve, reject) => {
+      let stream = cloudinary.uploader.upload_stream((error, result) => {
+        if (result) {
+          resolve(result)
+        } else {
+          reject(error)
+        }
+      })
+      streamifier.createReadStream(req.file.buffer).pipe(stream)
+    })
+  }
+  async function upload(req) {
+    let result = await streamUpload(req)
+    console.log(result)
+    return result
+  }
+  upload(req).then((uploaded) => {
+    req.body.featureImage = uploaded.url
+    blog
+      .addPost(req.body)
+      .then(() => {
+        res.redirect("/posts")
+      })
+      .catch((err) => {
+        res.send()
+      })
+  })
+})
+
+app.get("/posts/:id", (req, res) => {
+  blog
+    .getPostsById(req.params.id)
+    .then((data) => {
+      res.json(data)
+    })
+    .catch((err) => {
+      res.json({
+        message: "no results",
+      })
     })
 })    
 

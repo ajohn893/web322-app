@@ -60,18 +60,9 @@ const fs = require("fs")
      resolve(published)
    })
  }
-/*function getAllPosts() {
-	return promise
-		.then((result) => {
-			return result.posts;
-		})
-		.catch((error) => {
-			console.log(error);
-		});*/
 
-// exports.addPost (postData)
-exports.addPost = () => (postData)=>{
-  let AddPost = new Promise((resolve, reject) => {
+exports.addPost = (postData)=>{
+  return new Promise((resolve, reject) => {
     if (postData.published ){
       postData.published = true 
     } else {
