@@ -1,8 +1,6 @@
 let posts = []
 let categories = []
-const { rejects } = require("assert")
 const fs = require("fs")
-const { resolve } = require("path")
  exports.initialize = () => {
    return new Promise((resolve, reject) => {
      fs.readFile("./data/posts.json", "utf8", function (err, data) {
@@ -41,6 +39,17 @@ const { resolve } = require("path")
      resolve(posts)
    })
  }
+
+ exports.getCategories = () => {
+  return new Promise((resolve, reject) => {
+    if (categories.length == 0) {
+      reject("No results in Categories")
+      return
+    }
+    resolve(categories)
+  })
+}
+
  exports.getPublishedPosts = function() {
    return new Promise(function(resolve, reject) {
      var published = posts.filter((post) => post.published == true)
@@ -62,60 +71,55 @@ const { resolve } = require("path")
 
 // exports.addPost (postData)
 exports.addPost = () => (postData)=>{
-  var AddPost = new Promise((resolve, reject) => {
-    if (postData){
-      postData.id = posts.length +1;
-      if (postData.published){
-        postData.published = true;}
-      else {
-        postData.published = false; 
-          posts.push(postData);
-          resolve(posts);}
+  let AddPost = new Promise((resolve, reject) => {
+    if (postData.published ){
+      postData.published = true 
+    } else {
+      postData.published = false
     }
-    else{
-      errorReturn = "Error found!";
-      reject({ message: errorReturn});
-    }
-    return(AddPost)
-  })
-}
-
+    postData.id = posts.length + 1 
+    posts.push(postData);
+    resolve()
+    })
+  }  
+  
+  exports.getPostsByCategory = (category) => {
+    return new Promise((resolve, reject) => {
+      let output = posts.filter((post) => post.category == category)
+      if (output.length == 0) {
+        reject("No results returned")
+        return
+      } else {
+        resolve(output)
+      }
+    })
+}  
+   
 exports.getPostsByMinDate = (minDateStr) => {
-  var post = [];
-  var AddPost = new Promise((resolve,reject) => {
-    for(var i =0; i < posts.length; i++) {
-      if(new Date(posts[i].postData) >= new Date(minDateStr)){
-        console.log("PostDate value is greater than minDateStr")
-        post.push(posts[i]);
-      }
-    }
-      if(post.length == 0){
-        errorReturn = "no results returned";
-        reject({ message: errorReturn});
-      }
-      resolve(post);
-  })
-  return AddPost;
-};
-
-exports.getPostById = (id) => {
   return new Promise((resolve,reject) => {
-    var post = posts.filter(posts => posts.id == id);
-    if (post.length == 0) {
-      reject("no results returned");
+    let output = posts.filter((post) => 
+    new Date(post.postData) >= new Date(minDateStr)
+    ) 
+    if (output.length == 0){
+      reject("not vaild")
+      return
+    } else {
+      resolve(output)
     }
-    resolve(post);
+    })
+}   
+    
+exports.getPostsById = (id) => {
+  return new Promise((resolve, reject) => {
+    let output = posts.find((post) => post.id == id)
+    if (!output) {
+      reject("No results returned")
+      return
+    } else {
+      resolve(output)
+    }
   })
 }
 
- exports.getCategories = () => {
-   return new Promise((resolve, reject) => {
-     if (categories.length == 0) {
-       reject("No results in Categories")
-       return
-     }
-     resolve(categories)
-   })
- }
- 
+
  
