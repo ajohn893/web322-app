@@ -5,9 +5,9 @@
 * 
 *  Name: --Aaron John Bivera-- Student ID: --156486201-- Date: --16/06/2022--
 *
-*  Online (Heroku) URL: https://frozen-temple-45666.herokuapp.com
+*  Online (Heroku) URL: ___https://frozen-temple-45666.herokuapp.com____
 *
-*  GitHub Repository URL: https://github.com/ajohn893/web322-app.git_
+*  GitHub Repository URL: ______https://github.com/ajohn893/web322-app.git________________________________________________
 *
 ********************************************************************************/ 
 const HTTP_PORT = process.env.PORT || 8080;
@@ -27,6 +27,8 @@ cloudinary.config({
   api_secret: 'w-OcperQYlP5WQ3_j-KBLHjwpE4',
   secure: true
 })
+// remove comment after editing about.html file
+
 
 app.use(express.static("public"));
 
@@ -90,7 +92,6 @@ app.get("/posts", (req, res) => {
 app.get("/posts/add", (req, res) => {
   res.sendFile(path.join(__dirname + "/views/addPost.html"))
 })
-
 app.post("/posts/add", upload.single("featureImage"), (req, res) => {
   let streamUpload = (req) => {
     return new Promise((resolve, reject) => {
@@ -133,7 +134,8 @@ app.get("/posts/:id", (req, res) => {
         message: "no results",
       })
     })
-})    
+})
+
 
 app.get("*", (req, res) => {
 	res.status(404).send(" 404 Page Not Found ⚠️");
