@@ -21,6 +21,7 @@ const cloudinary = require('cloudinary').v2
 const streamifier = require('streamifier')
 const upload = multer(); 
 const exphbs = require("express-handlebars");
+const stripJs = require('strip-js');
 
 cloudinary.config({
   cloud_name: 'dh0vyvebb',
