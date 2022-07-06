@@ -65,7 +65,7 @@ app.use(function(req,res,next){
 });
 
 app.get("/", (req, res) => {
-  res.redirect("/blog")
+  res.redirect("/about")
 })
 app.get("/about", (req, res) => {
   res.render("about");
