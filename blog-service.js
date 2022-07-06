@@ -1,6 +1,7 @@
 let posts = []
 let categories = []
 const fs = require("fs")
+const { resolve } = require("path")
  exports.initialize = () => {
    return new Promise((resolve, reject) => {
      fs.readFile("./data/posts.json", "utf8", function (err, data) {
@@ -110,6 +111,13 @@ exports.getPostsById = (id) => {
       resolve(output)
     }
   })
+}
+
+exports.getPublishedPostsByCategory = (category) => {
+    return new Promise((resolve, reject) => {
+        let output = posts.filter(post => post.published && post.category == category);
+        (output.length > 0) ? resolve(output) : reject("No results returned");
+    });
 }
 
 
