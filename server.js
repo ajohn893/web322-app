@@ -84,10 +84,10 @@ app.get('/blog', async (req, res) => {
       // if there's a "category" query, filter the returned posts by category
       if(req.query.category){
           // Obtain the published "posts" by category
-          posts = await blogData.getPublishedPostsByCategory(req.query.category);
+          posts = await blog.getPublishedPostsByCategory(req.query.category);
       }else{
           // Obtain the published "posts"
-          posts = await blogData.getPublishedPosts();
+          posts = await blog.getPublishedPosts();
       }
 
       // sort the published posts by postDate
@@ -106,7 +106,7 @@ app.get('/blog', async (req, res) => {
 
   try{
       // Obtain the full list of "categories"
-      let categories = await blogData.getCategories();
+      let categories = await blog.getCategories();
 
       // store the "categories" data in the viewData object (to be passed to the view)
       viewData.categories = categories;
@@ -123,40 +123,32 @@ app.get("/categories", (req, res) => {
   blog
     .getCategories()
     .then((data) => {
-      res.json({ data })
+      res.render("categories", {categories: data});
     })
     .catch((err) => {
-      res.json({ message: err })
+      res.render("categories", { message: err })
     })
 })
+
 app.get("/posts", (req, res) => {
+  
+  let queryPromise = null;
+
   if (req.query.category) {
-    blog
-      .getPostsByCategory(req.query.category)
-      .then((data) => {
-        res.json(data)
-      })
-      .catch((err) => {
-        res.json({ message: err })
-      })
+      queryPromise = blog.getPostsByCategory(req.query.category);
   } else if (req.query.minDate) {
-    blog
-      .getPostsByMinDate(req.query.minDate)
-      .then((data) => {
-        res.json(data)
-      })
-      .catch((err) => {
-        res.json({ message: err })
-      })
+      queryPromise = blog.getPostsByMinDate(req.query.minDate);
   } else {
-    blog
-      .getAllPosts()
-      .then((data) => {
-        res.json(data)
-      })
-      .catch((err) => res.json({ message: err }))
+      queryPromise = blog.getAllPosts()
   }
-})
+
+  queryPromise.then(data => {
+      res.render("posts", {posts: data});
+  }).catch(err => {
+      res.render("posts", {message: "no results"});
+  })
+
+}); 
 
 app.get('/posts/add', (req, res) => {
   res.render("addPost");
@@ -206,10 +198,59 @@ app.get("/posts/:id", (req, res) => {
     })
 })
 
+app.get('/blog/:id', async (req, res) => {
 
-app.get("*", (req, res) => {
-	res.status(404).send(" 404 Page Not Found ⚠️");
+  // Declare an object to store properties for the view
+  let viewData = {};
+
+  try{
+
+      // declare empty array to hold "post" objects
+      let posts = [];
+
+      // if there's a "category" query, filter the returned posts by category
+      if(req.query.category){
+          // Obtain the published "posts" by category
+          posts = await blog.getPublishedPostsByCategory(req.query.category);
+      }else{
+          // Obtain the published "posts"
+          posts = await blog.getPublishedPosts();
+      }
+
+      // sort the published posts by postDate
+      posts.sort((a,b) => new Date(b.postDate) - new Date(a.postDate));
+
+      // store the "posts" and "post" data in the viewData object (to be passed to the view)
+      viewData.posts = posts;
+
+  }catch(err){
+      viewData.message = "no results";
+  }
+
+  try{
+      // Obtain the post by "id"
+      viewData.post = await blog.getPostById(req.params.id);
+  }catch(err){
+      viewData.message = "no results"; 
+  }
+
+  try{
+      // Obtain the full list of "categories"
+      let categories = await blog.getCategories();
+
+      // store the "categories" data in the viewData object (to be passed to the view)
+      viewData.categories = categories;
+  }catch(err){
+      viewData.categoriesMessage = "no results"
+  }
+
+  // render the "blog" view with all of the data (viewData)
+  res.render("blog", {data: viewData})
 });
+
+app.use((req, res) => {
+  res.status(404).render("404");
+})
 
 blog
   .initialize().then(() => {

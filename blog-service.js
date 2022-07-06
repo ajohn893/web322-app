@@ -1,5 +1,6 @@
 let posts = []
 let categories = []
+const { resolveObjectURL } = require("buffer")
 const fs = require("fs")
 const { resolve } = require("path")
  exports.initialize = () => {
@@ -31,15 +32,13 @@ const { resolve } = require("path")
  }
 
 
- exports.getAllPosts = function() {
+ exports.getAllPosts = () => {
    return new Promise(function(resolve, reject) {
-     if (posts.length == 0) {
-       reject("No results in posts")
-       return
-     }
-     resolve(posts)
-   })
- }
+      (posts.length > 0) ? resolve(posts) :
+       reject("No results in posts");
+     });
+  }         
+   
 
  exports.getCategories = () => {
   return new Promise((resolve, reject) => {
