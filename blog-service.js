@@ -52,15 +52,12 @@ const { resolve } = require("path")
 }
 
  exports.getPublishedPosts = function() {
-   return new Promise(function(resolve, reject) {
-     var published = posts.filter((post) => post.published == true)
-     if (published.length == 0) {
-       reject("No results in published posts")
-       return
-     }
-     resolve(published)
-   })
- }
+    return new Promise(function(resolve, reject) {
+        var published = posts.filter((post) => post.published);
+        (published.length > 0) ? resolve(published) : 
+        reject("No results in published posts");
+    });
+}   
 
 exports.addPost = (postData)=>{
   return new Promise((resolve, reject) => {
