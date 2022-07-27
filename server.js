@@ -5,9 +5,9 @@
 * 
 *  Name: --Aaron John Bivera-- Student ID: --156486201-- Date: --25/07/2022--
 *
-*  Online (Heroku) URL: ___https://afternoon-garden-55497.herokuapp.com____
+*  Online (Heroku) URL:  https://afternoon-garden-55497.herokuapp.com
 *
-*  GitHub Repository URL: ______https://github.com/ajohn893/web322-app.git________________________________________________
+*  GitHub Repository URL: https://github.com/ajohn893/web322-app.git
 *
 ********************************************************************************/ 
 const HTTP_PORT = process.env.PORT || 8080;
@@ -304,4 +304,4 @@ blog
   }).catch((error) => {
         console.log(error);
 })
-  
+ //https://git.heroku.com/afternoon-garden-55497.git 
