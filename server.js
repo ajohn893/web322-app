@@ -21,7 +21,7 @@ const cloudinary = require('cloudinary').v2
 const streamifier = require('streamifier')
 const upload = multer(); 
 const exphbs = require("express-handlebars");
-const stripJs = require('strip-js');
+const stripJs = require("strip-js");
 const Sequelize = require('sequelize');
 const { data } = require("jquery");
 
@@ -51,7 +51,7 @@ app.engine('.hbs', exphbs.engine({
             }
         },
         safeHTML: function(context){
-            return stripJS(context);
+            return stripJs(context);
         },
         formatDate: function(dateObj){
             let year = dateObj.getFullYear();
@@ -108,7 +108,6 @@ app.get('/blog', async (req, res) => {
       // store the "posts" and "post" data in the viewData object (to be passed to the view)
       viewData.posts = posts;
       viewData.post = post;
-
   }catch(err){
       viewData.message = "no results";
   }
@@ -124,29 +123,107 @@ app.get('/blog', async (req, res) => {
   }
 
   // render the "blog" view with all of the data (viewData)
-  res.render("blog", {data: viewData})
+  res.render("blog", { data: viewData })
 
 });
 
+app.get('/blog/:id', async (req, res) => {
+  // Declare an object to store properties for the view
+ let viewData = {};
+
+ try{
+     // declare empty array to hold "post" objects
+     let posts = [];
+
+   // if there's a "category" query, filter the returned posts by category
+     if(req.query.category){
+       // Obtain the published "posts" by category
+        posts = await blog.getPublishedPostsByCategory(req.query.category);
+     }else{
+       // Obtain the published "posts"
+         posts = await blog.getPublishedPosts();
+     }
+
+   // sort the published posts by postDate
+     posts.sort((a, b) => new Date(b.postDate) - new Date(a.postDate));
+
+   // store the "posts" and "post" data in the viewData object (to be passed to the view)
+     viewData.posts = posts;
+ }catch(err){
+     viewData.message = "no results";
+ }
+
+ try{
+   // Obtain the post by "id"
+     viewData.post = await blog.getPostsById(req.params.id);
+ }catch(err){
+     viewData.message = "no results"; 
+ }
+
+ try{
+   // Obtain the full list of "categories"
+     let categories = await blog.getCategories();
+
+   // store the "categories" data in the viewData object (to be passed to the view)
+     viewData.categories = categories;
+ }catch(err){
+     viewData.categoriesMessage = "no results"
+ }
+
+// render the "blog" view with all of the data (viewData)
+ res.render("blog", {data: viewData})
+});
+
 app.get("/posts", (req, res) => {
-  
-  let queryPromise = null;
-
   if (req.query.category) {
-      queryPromise = blog.getPostsByCategory(req.query.category);
+    blog
+      .getPostsByCategory(req.query.category)
+      .then((data) => {
+        if (data.length == 0) {
+          res.render("posts", { message: "no results" });
+          return;
+        }
+        res.render("posts", { posts: data });
+      })
+      .catch(() => {
+        res.render("posts", { message: "no results" });
+      });
   } else if (req.query.minDate) {
-      queryPromise = blog.getPostsByMinDate(req.query.minDate);
+    blog
+      .getPostsByMinDate(req.query.minDate)
+      .then((data) => {
+        if (data.length == 0) {
+          res.render("posts", { message: "no results" });
+          return;
+        }
+        res.render("posts", { posts: data });
+      })
+      .catch(() => {
+        res.render("posts", { message: "no results" });
+      });
   } else {
-      queryPromise = blog.getAllPosts()
+    blog
+      .getAllPosts()
+      .then((data) => {
+        if (data.length == 0) {
+          res.render("posts", { message: "no results" });
+          return;
+        }
+        res.render("posts", { posts: data });
+      })
+      .catch(() => res.render("posts", { message: "no results" }));
   }
-
-  queryPromise.then(data => {
-      (data.length > 0 ) ? res.render("posts", {posts: data}) : res.render("posts", {message: "no results"});
-  }).catch(err => {
-      res.render("posts", {message: "no results"});
-  })
-
 }); 
+
+app.get('/posts/add', (req, res) => {
+  blog
+    .getCategories()
+    .then((data) => {
+      res.render("addPost", {categories: data});  
+    }).catch((err) => {
+      res.render("addPost", {categories: [] });  
+    })
+})
 
 app.post("/posts/add", upload.single("featureImage"), (req, res) => {
   let streamUpload = (req) => {
@@ -179,26 +256,6 @@ app.post("/posts/add", upload.single("featureImage"), (req, res) => {
   })
 })
 
-app.get('/posts/add', (req, res) => {
-    blog
-    .getCategories()
-    .then((data) => {
-        res.render("addPost", {categories: data});  
-    }).catch((err) => {
-        res.render("addPost", {categories: [] });  
-    })
-})
-
-app.get("/posts/delete/:id", (req, res) => {
-    blog
-    .deletePostById(req.params.id)
-    .then(() => {
-        res.redirect("/posts");
-    }).catch((err) => {
-        res.status(500).send("Unable to remove Post / Invaild Request"); 
-    })
-})
-
 app.get("/posts/:id", (req, res) => {
   blog
     .getPostsById(req.params.id)
@@ -212,61 +269,23 @@ app.get("/posts/:id", (req, res) => {
     })
 })
 
-app.get('/blog/:id', async (req, res) => {
-
-    // Declare an object to store properties for the view
-    let viewData = {};
-
-    try{
-
-      // declare empty array to hold "post" objects
-        let posts = [];
-
-      // if there's a "category" query, filter the returned posts by category
-        if(req.query.category){
-          // Obtain the published "posts" by category
-           posts = await blog.getPublishedPostsByCategory(req.query.category);
-        }else{
-          // Obtain the published "posts"
-            posts = await blog.getPublishedPosts();
-        }
-
-      // sort the published posts by postDate
-        posts.sort((a,b) => new Date(b.postDate) - new Date(a.postDate));
-
-      // store the "posts" and "post" data in the viewData object (to be passed to the view)
-        viewData.posts = posts;
-
-    }catch(err){
-        viewData.message = "no results";
-    }
-
-    try{
-      // Obtain the post by "id"
-        viewData.post = await blog.getPostById(req.params.id);
-    }catch(err){
-        viewData.message = "no results"; 
-    }
-
-    try{
-      // Obtain the full list of "categories"
-        let categories = await blog.getCategories();
-
-      // store the "categories" data in the viewData object (to be passed to the view)
-        viewData.categories = categories;
-    }catch(err){
-        viewData.categoriesMessage = "no results"
-    }
-
-  // render the "blog" view with all of the data (viewData)
-    res.render("blog", {data: viewData})
-});
+app.get("/posts/delete/:id", (req, res) => {
+    blog
+    .deletePostById(req.params.id)
+    .then(() => {
+        res.redirect("/posts");
+    }).catch((err) => {
+        res.status(500).send("Unable to remove Post / Invaild Request"); 
+    })
+})
 
 app.get("/categories", (req, res) => {
   blog.getCategories()
   .then((data) => {
-      (data.length > 0) ? res.render("categories", {categories: data}):
-      res.render("categories",{ message: "no results"});
+      res.render("categories", {categories: data})
+      
+  }).catch(()=>{
+    res.render("categories",{ message: "no results"});
   });
 });
 
