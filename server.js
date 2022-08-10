@@ -70,12 +70,11 @@ const HTTP_PORT = process.env.PORT || 8080;
  //-----------------
  
  cloudinary.config({
-   cloud_name: "duuw7ovpd",
-   api_key: "822241625863294",
-   api_secret: "XuUc13WQ3bZCXD7tzaKVdNRT_7k",
-   secure: true,
- });
- 
+  cloud_name: "dzsbrrzau",
+  api_key: "659429114744825",
+  api_secret: "zaIs4HB6UB-_AIJhx0Ts5ERurp4",
+  secure: true,
+})
  app.use(function (req, res, next) {
    let route = req.path.substring(1);
    app.locals.activeRoute =
@@ -333,11 +332,11 @@ const HTTP_PORT = process.env.PORT || 8080;
      .catch(() => res.render("404", { message: "Unable to delete category.." }));
  });
  
- app.use((req, res) => {
+app.use((req, res) => {
   res.status(404).render("404");
 })
 
- blog
+blog
    .initialize()
    .then(() => {
      app.listen(HTTP_PORT, () => {
