@@ -70,9 +70,9 @@ const HTTP_PORT = process.env.PORT || 8080;
  //-----------------
  
  cloudinary.config({
-   cloud_name: "senecastudent",
-   api_key: "782979287742412",
-   api_secret: "mWZRouA-UYpJ6r-YpS8vQRqJjZo",
+   cloud_name: "duuw7ovpd",
+   api_key: "822241625863294",
+   api_secret: "XuUc13WQ3bZCXD7tzaKVdNRT_7k",
    secure: true,
  });
  
@@ -255,8 +255,8 @@ const HTTP_PORT = process.env.PORT || 8080;
      });
    };
    async function upload(req) {
-     let result = await streamUpload(req);
-     console.log(result);
+     let result =  streamUpload(req);
+     console.log(await result);
      return result;
    }
    upload(req).then((uploaded) => {
@@ -265,10 +265,8 @@ const HTTP_PORT = process.env.PORT || 8080;
        .addPost(req.body)
        .then(() => {
          res.redirect("/posts");
-       })
-       .catch(() => {
-         res.render("404", { message: "INVALID DATA ENTRIES.." });
        });
+     
    });
  });
  
@@ -335,19 +333,19 @@ const HTTP_PORT = process.env.PORT || 8080;
      .catch(() => res.render("404", { message: "Unable to delete category.." }));
  });
  
-app.use((req, res) => {
-    res.status(404).render("404");
+ app.use((req, res) => {
+  res.status(404).render("404");
 })
 
-blog
-  .initialize().then(() => {
-    app.listen(HTTP_PORT, () => {
-      console.log('⚡️⚡️⚡️ '+`Express http server listening on ${HTTP_PORT}` + ' ⚡️⚡️⚡️');
-    });
-  }).catch((error) => {
-        console.log(error);
-})
-//  //https://git.heroku.com/afternoon-garden-55497.git 
-
-
+ blog
+   .initialize()
+   .then(() => {
+     app.listen(HTTP_PORT, () => {
+       console.log('⚡️⚡️⚡️ '+`Express http server listening on ${HTTP_PORT}` + ' ⚡️⚡️⚡️');
+     });
+   })
+   .catch(() => {
+     console.log("Failed promises");
+   });
  
+
