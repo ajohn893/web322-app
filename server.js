@@ -368,13 +368,13 @@ app.post("/login", (req, res) => {
 })
 
 app.get("/register", (req, res) => {
-    res.render("Register");
+    res.render("register");
 })
 
 app.post("/register", (req, res) => {
     authData.registerUser(req.body)
     .then(() => {
-      res.render("Register", { successMessage: "User Created" })
+      res.render("register", { successMessage: "User Created" })
     })
     .catch((err) => {
        res.render("register", { 
