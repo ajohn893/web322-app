@@ -1,5 +1,5 @@
 // /*********************************************************************************
-// *  WEB322 – Assignment 05
+// *  WEB322 – Assignment 06
 // *  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically from any other source 
 // *  (including 3rd party web sites) or distributed to other students.
 // * 
@@ -12,19 +12,20 @@
 // ********************************************************************************/ 
 
 const HTTP_PORT = process.env.PORT || 8080;
- const express = require("express");
- const multer = require("multer");
- const exphbs = require("express-handlebars");
- const cloudinary = require("cloudinary").v2;
- const streamifier = require("streamifier");
- const path = require("path");
- const blog = require("./blog-service");
- const stripJs = require("strip-js");
- const { rejects } = require("assert");
- const app = express();
- app.engine(
-   ".hbs",
-   exphbs.engine({
+const express = require("express");
+const multer = require("multer");
+const exphbs = require("express-handlebars");
+const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
+const path = require("path");
+const blog = require("./blog-service");
+const stripJs = require("strip-js");
+const { rejects } = require("assert");
+const authData = require("./auth-service.js");
+const clientSessions = require("client-sessions");
+const app = express();
+
+app.engine(".hbs", exphbs.engine({
      extname: ".hbs",
      defaultLayout: "main",
      helpers: {
@@ -33,11 +34,7 @@ const HTTP_PORT = process.env.PORT || 8080;
            "<li" +
            (url == app.locals.activeRoute ? ' class="active" ' : "") +
            '><a href="' +
-           url +
-           '">' +
-           options.fn(this) +
-           "</a></li>"
-         );
+           url + '">' + options.fn(this) + "</a></li>");
        },
  
        equal: function (lvalue, rvalue, options) {
@@ -68,14 +65,13 @@ const HTTP_PORT = process.env.PORT || 8080;
  app.use(express.urlencoded({ extended: true }));
  
  //-----------------
- 
  cloudinary.config({
   cloud_name: "dzsbrrzau",
   api_key: "659429114744825",
   api_secret: "zaIs4HB6UB-_AIJhx0Ts5ERurp4",
   secure: true,
 })
- app.use(function (req, res, next) {
+app.use(function (req, res, next) {
    let route = req.path.substring(1);
    app.locals.activeRoute =
      "/" +
@@ -86,15 +82,36 @@ const HTTP_PORT = process.env.PORT || 8080;
    next();
  });
  //------------
+// client session
+ app.use(clientSessions({
+  cookieName: "session", 
+  secret: "week10example_web322", 
+  duration: 2 * 60 * 1000, 
+  activeDuration: 1000 * 60
+}));
+
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+})
+
+function ensureLogin(req, res, next) {
+    if(!req.session.user) {
+        res.redirect("/login");
+    }
+    else{
+      next();
+    }
+}
  
  app.get("/", (req, res) => {
    res.redirect("blog");
  });
  app.get("/about", (req, res) => {
    res.render("about");
- });
+});
  
- app.get("/blog", async (req, res) => {
+app.get("/blog", async (req, res) => {
    // Declare an object to store properties for the view
    let viewData = {};
  
@@ -183,9 +200,9 @@ const HTTP_PORT = process.env.PORT || 8080;
  
    // render the "blog" view with all of the data (viewData)
    res.render("blog", { data: viewData });
- });
+});
  
- app.get("/posts", (req, res) => {
+app.get("/posts", ensureLogin, (req, res) => {
    if (req.query.category) {
      blog
        .getPostsByCategory(req.query.category)
@@ -224,9 +241,9 @@ const HTTP_PORT = process.env.PORT || 8080;
        })
        .catch(() => res.render("posts", { message: "no results" }));
    }
- });
+});
  
- app.get("/posts/add", (req, res) => {
+app.get("/posts/add", ensureLogin, (req, res) => {
    blog
      .getCategories()
      .then((data) => {
@@ -239,8 +256,8 @@ const HTTP_PORT = process.env.PORT || 8080;
          categories: [],
        });
      });
- });
- app.post("/posts/add", upload.single("featureImage"), (req, res) => {
+});
+app.post("/posts/add", ensureLogin, upload.single("featureImage"), (req, res) => {
    let streamUpload = (req) => {
      return new Promise((resolve, reject) => {
        let stream = cloudinary.uploader.upload_stream((error, result) => {
@@ -267,9 +284,9 @@ const HTTP_PORT = process.env.PORT || 8080;
        });
      
    });
- });
+});
  
- app.get("/post/:id", (req, res) => {
+app.get("/post/:id", ensureLogin, (req, res) => {
    blog
      .getPostsById(req.params.id)
      .then((data) => {
@@ -280,9 +297,9 @@ const HTTP_PORT = process.env.PORT || 8080;
          message: "no results",
        });
      });
- });
+});
  
- app.get("/posts/delete/:id", (req, res) => {
+app.get("/posts/delete/:id", ensureLogin, (req, res) => {
    blog
      .deletePostById(req.params.id)
      .then(() => {
@@ -291,9 +308,9 @@ const HTTP_PORT = process.env.PORT || 8080;
      .catch(() => {
        res.render("404", { message: "Unable to delete the specified post.." });
      });
- });
+});
  
- app.get("/categories", (req, res) => {
+app.get("/categories", ensureLogin, (req, res) => {
    blog
      .getCategories()
      .then((data) => {
@@ -306,13 +323,13 @@ const HTTP_PORT = process.env.PORT || 8080;
      .catch(() => {
        res.render("categories", { message: "no results" });
      });
- });
+});
  
- app.get("/categories/add", (req, res) => {
+app.get("/categories/add", ensureLogin, (req, res) => {
    res.render("addCategory");
- });
+});
  
- app.post("/categories/add", (req, res) => {
+app.post("/categories/add", ensureLogin, (req, res) => {
    blog
      .addCategory(req.body)
      .then(() => {
@@ -320,31 +337,75 @@ const HTTP_PORT = process.env.PORT || 8080;
      })
      .catch(() => {
        res.render("404", { message: "Unable to add category.." });
-     });
- });
+           });
+});
  
- app.get("/categories/delete/:id", (req, res) => {
+app.get("/categories/delete/:id", ensureLogin, (req, res) => {
    blog
      .deleteCategoryById(req.params.id)
      .then(() => {
        res.redirect("/categories");
      })
      .catch(() => res.render("404", { message: "Unable to delete category.." }));
- });
- 
+});
+
+app.get("/login", (req, res) => {
+    res.render("login");
+})
+
+app.post("/login", (req, res) => {
+    req.body.userAgent = req.get("User-Agent");
+    authData.checkUser(req.body)
+    .then((user) => {
+      req.session.user = { 
+        userName: user.userName, 
+        email: user.email,
+        loginHistory: user.loginHistory }
+      res.redirect("/posts")  
+    }).catch((err) => {
+        res.render("login", {errorMessage: err, userName: req.body.userName})
+    })
+})
+
+app.get("/register", (req, res) => {
+    res.render("Register");
+})
+
+app.post("/register", (req, res) => {
+    authData.registerUser(req.body)
+    .then(() => {
+      res.render("Register", { successMessage: "User Created" })
+    })
+    .catch((err) => {
+       res.render("register", { 
+        errorMessage: err,
+        userName: req.body.userName
+       })
+    })
+})
+
+app.get("/logout", (req, res) => {
+    req.session.reset()
+    res.redirect("/login")
+})
+
+app.get("/userHistory", (req, res) => {
+  res.render("userHistory")
+})
+
 app.use((req, res) => {
   res.status(404).render("404");
 })
 
-blog
-   .initialize()
-   .then(() => {
+blog.initialize()
+    .then(authData.initialize)
+    .then(() => {
      app.listen(HTTP_PORT, () => {
        console.log('⚡️⚡️⚡️ '+`Express http server listening on ${HTTP_PORT}` + ' ⚡️⚡️⚡️');
      });
-   })
-   .catch(() => {
+    }).catch(() => {
      console.log("Failed promises");
-   });
+});
  
+
 
